@@ -19,10 +19,10 @@ public class SimulatedDevice {
   // The device connection string to authenticate the device with your IoT hub.
   // Using the Azure CLI:
   // az iot hub device-identity show-connection-string --hub-name {YourIoTHubName} --device-id MyJavaDevice --output table
-  private static String connString = "{Your device connection string here}";
+  private static String connString = "{connetion-string}";
 
   // Using the MQTT protocol to connect to IoT Hub
-  private static IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+  private static IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS_WS;
   private static DeviceClient client;
 
   // Specify the telemetry to send to your IoT hub.
@@ -85,7 +85,7 @@ public class SimulatedDevice {
           synchronized (lockobj) {
             lockobj.wait();
           }
-          Thread.sleep(1000);
+          Thread.sleep(60000);
         }
       } catch (InterruptedException e) {
         System.out.println("Finished.");
