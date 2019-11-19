@@ -20,10 +20,10 @@ public class SimulatedDevice {
   // The device connection string to authenticate the device with your IoT hub.
   // Using the Azure CLI:
   // az iot hub device-identity show-connection-string --hub-name {YourIoTHubName} --device-id MyJavaDevice --output table
-  private static String connString = "{Your device connection string here}";
+  private static String connString = "{connetion-string}";
 
   // Using the MQTT protocol to connect to IoT Hub
-  private static IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+  private static IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS_WS;
   private static DeviceClient client;
 
   // Define method response codes
@@ -31,7 +31,7 @@ public class SimulatedDevice {
   private static final int METHOD_NOT_DEFINED = 404;
   private static final int INVALID_PARAMETER = 400;
 
-  private static int telemetryInterval = 1000;
+  private static volatile int telemetryInterval = 60000;
 
   // Specify the telemetry to send to your IoT hub.
   private static class TelemetryDataPoint {
