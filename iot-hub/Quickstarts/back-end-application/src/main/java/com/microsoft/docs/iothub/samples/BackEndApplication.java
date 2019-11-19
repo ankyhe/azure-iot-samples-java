@@ -17,14 +17,14 @@ public class BackEndApplication {
 
   // Connection string for your IoT Hub
   // az iot hub show-connection-string --hub-name {your iot hub name} --policy-name service
-  public static final String iotHubConnectionString = "{Your service connection string here}";
+  public static final String iotHubConnectionString = "{service-connection-string}";
 
   // Device to call direct method on.
-  public static final String deviceId = "MyJavaDevice";
+  public static final String deviceId = "{device-id}";
 
   // Name of direct method and payload.
   public static final String methodName = "SetTelemetryInterval";
-  public static final int payload = 10; // Number of seconds for telemetry interval.
+  public static final int payload = 120; // Number of seconds for telemetry interval.
 
   public static final Long responseTimeout = TimeUnit.SECONDS.toSeconds(30);
   public static final Long connectTimeout = TimeUnit.SECONDS.toSeconds(5);
