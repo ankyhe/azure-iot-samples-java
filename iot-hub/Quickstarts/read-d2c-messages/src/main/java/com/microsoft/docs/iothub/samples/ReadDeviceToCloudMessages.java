@@ -14,6 +14,7 @@ import com.microsoft.azure.eventhubs.EventHubException;
 import com.microsoft.azure.eventhubs.EventPosition;
 import com.microsoft.azure.eventhubs.EventHubRuntimeInformation;
 import com.microsoft.azure.eventhubs.PartitionReceiver;
+import com.microsoft.azure.eventhubs.TransportType;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -24,23 +25,24 @@ import java.util.concurrent.Executors;
 import java.nio.charset.Charset;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class ReadDeviceToCloudMessages {
 
   // az iot hub show --query properties.eventHubEndpoints.events.endpoint --name {your IoT Hub name}
-  private static final String eventHubsCompatibleEndpoint = "{your Event Hubs compatible endpoint}";
+  private static final String eventHubsCompatibleEndpoint = "";
 
   // az iot hub show --query properties.eventHubEndpoints.events.path --name {your IoT Hub name}
-  private static final String eventHubsCompatiblePath = "{your Event Hubs compatible name}";
+  private static final String eventHubsCompatiblePath = "";
 
   // az iot hub policy show --name service --query primaryKey --hub-name {your IoT Hub name}
-  private static final String iotHubSasKey = "{your service primary key}";
+  private static final String iotHubSasKey = "";
   private static final String iotHubSasKeyName = "service";
 
   // Track all the PartitionReciever instances created.
   private static ArrayList<PartitionReceiver> receivers = new ArrayList<PartitionReceiver>();
 
-  // Asynchronously create a PartitionReceiver for a partition and then start 
+  // Asynchronously create a PartitionReceiver for a partition and then start
   // reading any messages sent from the simulated client.
   private static void receiveMessages(EventHubClient ehClient, String partitionId)
       throws EventHubException, ExecutionException, InterruptedException {
@@ -48,34 +50,34 @@ public class ReadDeviceToCloudMessages {
     final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     // Create the receiver using the default consumer group.
-    // For the purposes of this sample, read only messages sent since 
+    // For the purposes of this sample, read only messages sent since
     // the time the receiver is created. Typically, you don't want to skip any messages.
     ehClient.createReceiver(EventHubClient.DEFAULT_CONSUMER_GROUP_NAME, partitionId,
-        EventPosition.fromEnqueuedTime(Instant.now())).thenAcceptAsync(receiver -> {
-          System.out.println(String.format("Starting receive loop on partition: %s", partitionId));
-          System.out.println(String.format("Reading messages sent since: %s", Instant.now().toString()));
+                            EventPosition.fromEnqueuedTime(Instant.now())).thenAcceptAsync(receiver -> {
+      System.out.println(String.format("Starting receive loop on partition: %s", partitionId));
+      System.out.println(String.format("Reading messages sent since: %s", Instant.now().toString()));
 
-          receivers.add(receiver);
+      receivers.add(receiver);
 
-          while (true) {
-            try {
-              // Check for EventData - this methods times out if there is nothing to retrieve.
-              Iterable<EventData> receivedEvents = receiver.receiveSync(100);
+      while (true) {
+        try {
+          // Check for EventData - this methods times out if there is nothing to retrieve.
+          Iterable<EventData> receivedEvents = receiver.receiveSync(100);
 
-              // If there is data in the batch, process it.
-              if (receivedEvents != null) {
-                for (EventData receivedEvent : receivedEvents) {
-                  System.out.println(String.format("Telemetry received:\n %s",
-                      new String(receivedEvent.getBytes(), Charset.defaultCharset())));
-                  System.out.println(String.format("Application properties (set by device):\n%s",receivedEvent.getProperties().toString()));
-                  System.out.println(String.format("System properties (set by IoT Hub):\n%s\n",receivedEvent.getSystemProperties().toString()));
-                }
-              }
-            } catch (EventHubException e) {
-              System.out.println("Error reading EventData");
+          // If there is data in the batch, process it.
+          if (receivedEvents != null) {
+            for (EventData receivedEvent : receivedEvents) {
+              System.out.println(String.format("Telemetry received:\n %s",
+                                               new String(receivedEvent.getBytes(), Charset.defaultCharset())));
+              System.out.println(String.format("Application properties (set by device):\n%s",receivedEvent.getProperties().toString()));
+              System.out.println(String.format("System properties (set by IoT Hub):\n%s\n",receivedEvent.getSystemProperties().toString()));
             }
           }
-        }, executorService);
+        } catch (EventHubException e) {
+          System.out.println("Error reading EventData");
+        }
+      }
+    }, executorService);
   }
 
   public static void main(String[] args)
@@ -83,16 +85,17 @@ public class ReadDeviceToCloudMessages {
 
     final ConnectionStringBuilder connStr = new ConnectionStringBuilder()
         .setEndpoint(new URI(eventHubsCompatibleEndpoint))
+        .setTransportType(TransportType.AMQP_WEB_SOCKETS)
         .setEventHubName(eventHubsCompatiblePath)
         .setSasKeyName(iotHubSasKeyName)
         .setSasKey(iotHubSasKey);
 
     // Create an EventHubClient instance to connect to the
     // IoT Hub Event Hubs-compatible endpoint.
-    final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     final EventHubClient ehClient = EventHubClient.createSync(connStr.toString(), executorService);
 
-    // Use the EventHubRunTimeInformation to find out how many partitions 
+    // Use the EventHubRunTimeInformation to find out how many partitions
     // there are on the hub.
     final EventHubRuntimeInformation eventHubInfo = ehClient.getRuntimeInformation().get();
 

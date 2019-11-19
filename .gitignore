@@ -1,33 +1,37 @@
-# Compiled class file
-*.class
+### OSX ###
+.DS_Store
 
-# Log file
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+### LOG ###
 *.log
 
-# BlueJ files
-*.ctxt
+### Plantuml file ###
+*.plantuml
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
-*.jar
-*.war
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-
-# Eclipse project files
-.project
+### STS ###
+.apt_generated
 .classpath
-org.eclipse.m2e.core.prefs
-org.eclipse.core.resources.prefs
-org.eclipse.jdt.core.prefs
-target
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
 
-# Maven version backups
-*.versionsBackup
+### IntelliJ IDEA ###
+.idea
+!.idea/codeStyleSettings.xml
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+build-rpm/target/
+build/common
